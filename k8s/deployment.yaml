@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-crm
+  namespace: django-crm
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: django-crm }
+  template:
+    metadata:
+      labels: { app: django-crm }
+    spec:
+      # include if you create the regcred secret (see step 3)
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: web
+          image: gitea.nidhun.me/nidhun/django-crm:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet: { path: "/", port: 8000 }
+            initialDelaySeconds: 10
+          livenessProbe:
+            httpGet: { path: "/", port: 8000 }
+            initialDelaySeconds: 20
+          env:
+            - name: DEBUG
+              value: "False"
+            # add your real app env here, e.g. SECRET_KEY, DATABASE_URL, etc.
