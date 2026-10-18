@@ -27,10 +27,9 @@ RUN apk del build-deps
 # Copy the Django application source into /app
 COPY django-crm .
 
-# Copy custom settings if the file exists (handle a missing file gracefully).
-# Note: ../settings.py is outside the build context, so this step normally does
-# nothing. Copy settings.py into django-crm/webcrm/ before building instead.
-RUN if [ -f "../settings.py" ]; then cp ../settings.py /app/webcrm/settings.py; fi
+# Replace the upstream settings with the settings.py from this repository
+# (configured for the MySQL service in docker-compose.yml)
+COPY settings.py /app/webcrm/settings.py
 
 # Create the directory that collectstatic writes to (STATIC_ROOT)
 RUN mkdir -p /app/static

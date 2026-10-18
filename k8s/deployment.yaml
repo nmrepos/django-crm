@@ -25,17 +25,16 @@ spec:
           image: gitea.nidhun.me/nidhun/django-crm:latest
           # Always pull, so a new "latest" image is used when pods restart
           imagePullPolicy: Always
-          # Note: the image listens on 8080 (see the Dockerfile). The ports
-          # here and in service.yaml should be changed to 8080 to match.
+          # The Django server in the image listens on 8080 (see the Dockerfile)
           ports:
-            - containerPort: 8000
+            - containerPort: 8080
           # Readiness probe: the pod only receives traffic once "/" responds
           readinessProbe:
-            httpGet: { path: "/", port: 8000 }
+            httpGet: { path: "/", port: 8080 }
             initialDelaySeconds: 10
           # Liveness probe: Kubernetes restarts the container if "/" stops responding
           livenessProbe:
-            httpGet: { path: "/", port: 8000 }
+            httpGet: { path: "/", port: 8080 }
             initialDelaySeconds: 20
           env:
             # Turn off Django debug mode

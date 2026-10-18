@@ -14,5 +14,5 @@ spec:
   ports:
     - name: http
       port: 80        # cluster-internal port
-      targetPort: 8000  # containerPort from your Deployment
+      targetPort: 8080  # containerPort from your Deployment
       nodePort: 32080   # << fixed port on the node (choose 30000–32767)
