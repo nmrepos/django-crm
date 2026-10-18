@@ -1,32 +1,45 @@
+# Deployment that runs the Django CRM container on Kubernetes
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: django-crm
   namespace: django-crm
 spec:
+  # Number of CRM pods to run
   replicas: 1
+  # The deployment manages pods with this label
   selector:
     matchLabels: { app: django-crm }
   template:
     metadata:
+      # Label given to each pod; the service uses it to find the pods
       labels: { app: django-crm }
     spec:
       # include if you create the regcred secret (see step 3)
+      # The secret holds the login for the private Gitea registry
       imagePullSecrets:
         - name: regcred
       containers:
         - name: web
+          # Image built and pushed by the Jenkins pipeline
           image: gitea.nidhun.me/nidhun/django-crm:latest
+          # Always pull, so a new "latest" image is used when pods restart
           imagePullPolicy: Always
+          # Note: the image listens on 8080 (see the Dockerfile). The ports
+          # here and in service.yaml should be changed to 8080 to match.
           ports:
             - containerPort: 8000
+          # Readiness probe: the pod only receives traffic once "/" responds
           readinessProbe:
             httpGet: { path: "/", port: 8000 }
             initialDelaySeconds: 10
+          # Liveness probe: Kubernetes restarts the container if "/" stops responding
           livenessProbe:
             httpGet: { path: "/", port: 8000 }
             initialDelaySeconds: 20
           env:
+            # Turn off Django debug mode
+            # (only takes effect if settings.py reads this variable)
             - name: DEBUG
               value: "False"
             # add your real app env here, e.g. SECRET_KEY, DATABASE_URL, etc.

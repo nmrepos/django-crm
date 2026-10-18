@@ -1,13 +1,22 @@
+# down.yml
+# Ansible playbook that stops the local stack and removes the MySQL client.
+# Run it with: ansible-playbook down.yml
 - name: remove mysql
+  # Runs on this machine only
   hosts: localhost
   gather_facts: false
   tasks:
+    # Stop and remove the containers.
+    # Note: this refers to mysql-adminer.yml, which is not in this repository.
+    # Change it to docker-compose.yml to stop the stack started by up.yml.
     - name: docker compose down
       community.docker.docker_compose_v2:
         project_src: .
         files:
         - mysql-adminer.yml
         state: absent
+
+    # Uninstall the MySQL command-line client installed by up.yml
     - name: Remove mysql-client
       ansible.builtin.package:
         name: mysql-client

@@ -1,13 +1,20 @@
+# Local development stack for Django CRM.
+# Start it with "docker compose up -d" (or "ansible-playbook up.yml").
 services:
 
+  # The Django CRM web application, built from the Dockerfile in this folder
   crm:
     build: .
     restart: always
+    # Start the database container before the CRM
     depends_on:
     - db
+    # Open the CRM at http://localhost:8080
     ports:
       - 8080:8080
 
+  # MySQL database used by the CRM.
+  # The database name, user and password must match DATABASES in settings.py.
   db:
     image: mysql
     restart: always
@@ -17,16 +24,23 @@ services:
       MYSQL_USER: crm_user
       MYSQL_PASSWORD: crmpass
     # (this is just an example, not intended to be a production configuration)
+    # Expose MySQL on the host so local tools can connect to it
     ports:
       - 3306:3306
+    # Keep the database files in a named volume so data survives restarts
     volumes:
       - mysql_db_data:/var/lib/mysql
+
+  # Adminer: a web interface for browsing the database.
+  # Open http://localhost:8078 and log in with the MySQL details above.
   adminer_container:
     image: adminer:latest
     environment:
+      # Pre-fill the server field with the database service name
       ADMINER_DEFAULT_SERVER: db
     ports:
       - 8078:8080
 
+# Named volume that stores the MySQL data
 volumes:
   mysql_db_data:

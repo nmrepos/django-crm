@@ -1,28 +1,38 @@
-#Up.yaml
+# up.yml
+# Ansible playbook that starts the local stack and installs helper tools.
+# Run it with: ansible-playbook up.yml
 - name: bootstrap mysql
+  # Runs on this machine only
   hosts: localhost
+  # Skip collecting system facts to make the run faster
   gather_facts: false
   tasks:
+    # Build and start every service defined in docker-compose.yml
     - name: docker compose up
       community.docker.docker_compose_v2:
         project_src: .
         files:
         - docker-compose.yml
         state: present
+
+    # Command-line MySQL client, handy for connecting to the database
     - name: Install mysql-client
       ansible.builtin.package:
         name: mysql-client
         update_cache: yes
         state: present
       become: yes
+
+    # Python libraries for talking to MySQL from scripts or Ansible modules
     - name: Install mysql python connectors
       ansible.builtin.pip:
         name:
           - pymysql
           - mysql-connector-python
+
+    # Install act, a tool that runs GitHub/Gitea Actions workflows locally.
+    # "creates" makes the task skip when act is already installed.
     - name: install nektos/act
       ansible.builtin.shell: curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
       args:
         creates: bin/act
-
-
