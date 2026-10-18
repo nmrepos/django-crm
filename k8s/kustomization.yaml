@@ -1,5 +1,7 @@
+# Kustomize entry point. Deploy everything with: kubectl apply -k k8s/
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+# Manifests to apply, in this order
 resources:
   - namespace.yaml
   - deployment.yaml
